@@ -17,14 +17,14 @@
   <ul class="flex-1 divide-y divide-gray-100 overflow-y-auto">
     @for (quake of store.earthquakes(); track quake.id) {
       <li
-        class="flex cursor-pointer items-start gap-3 px-4 py-3 transition hover:bg-gray-50"
-        (click)="select(quake)"
+        class="flex cursor-pointer items-start gap-3 px-4 py-3 transition hover:bg-gray-200"
+        (click)="selectEarthquake(quake)"
         (mouseenter)="onMouseEnter(quake)"
         (mouseleave)="onMouseLeave()"
       >
         <span
           class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
-          [class]="magClass(quake.properties.mag)"
+          [class]="magnitudeClass(quake.properties.mag)"
         >
           {{ quake.properties.mag | number: '1.1-1' }}
         </span>
@@ -37,7 +37,7 @@
         </div>
 
         <div class="shrink-0 text-right text-xs text-gray-500">
-          <p class="font-medium text-gray-700">{{ depth(quake.geometry.coordinates) | number: '1.0-0' }} km</p>
+          <p class="font-medium text-gray-700">{{ depthValue(quake.geometry.coordinates) | number: '1.0-0' }} km</p>
           <p class="mt-0.5">profundidad</p>
         </div>
       </li>

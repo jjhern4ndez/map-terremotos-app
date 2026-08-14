@@ -8,88 +8,65 @@ export class EarthquakeMapStore {
 
   private readonly earthquakeService = inject(EarthquakeService);
 
-  // -------------------------
-  // State
-  // -------------------------
+  /**
+   * Estados principales
+   */
+  private readonly _earthquakes = signal<EarthquakeFeature[]>([]);
 
-  private readonly _earthquakes =
-    signal<EarthquakeFeature[]>([]);
+  private readonly _responseGeoJson = signal<any>([]);
 
-  private readonly _responseGeoJson =
-    signal<any>([]);
+  private readonly _selectedEarthquakeId = signal<string | null>(null);
 
-  private readonly _selectedEarthquakeId =
-    signal<string | null>(null);
+  private readonly _hoveredEarthquakeId = signal<string | null>(null);
 
-  private readonly _hoveredEarthquakeId =
-    signal<string | null>(null);
+  private readonly _loading = signal(false);
 
-  private readonly _loading =
-    signal(false);
+  private readonly _error = signal<string | null>(null);
 
-  private readonly _error =
-    signal<string | null>(null);
+  private readonly _flyToRequest = signal<number[] | null>(null);
 
-  private readonly _flyToRequest =
-    signal<number[] | null>(null);
+  /**
+   * Getters
+   */
+  readonly earthquakes = this._earthquakes.asReadonly();
 
+  readonly responseGeoJson = this._responseGeoJson.asReadonly();
 
-  // -------------------------
-  // Selectors
-  // -------------------------
+  readonly selectedEarthquakeId = this._selectedEarthquakeId.asReadonly();
 
-  readonly earthquakes =
-    this._earthquakes.asReadonly();
+  readonly hoveredEarthquakeId = this._hoveredEarthquakeId.asReadonly();
 
-  readonly responseGeoJson =
-    this._responseGeoJson.asReadonly();
+  readonly loading = this._loading.asReadonly();
 
-  readonly selectedEarthquakeId =
-    this._selectedEarthquakeId.asReadonly();
+  readonly error = this._error.asReadonly();
 
-  readonly hoveredEarthquakeId =
-    this._hoveredEarthquakeId.asReadonly();
-
-  readonly loading =
-    this._loading.asReadonly();
-
-  readonly error =
-    this._error.asReadonly();
-
-  readonly flyToRequest =
-    this._flyToRequest.asReadonly();
-
+  readonly flyToRequest = this._flyToRequest.asReadonly();
 
   readonly selectedEarthquake = computed(() => {
 
     const id = this._selectedEarthquakeId();
 
-    if (!id) {
-      return null;
-    }
+    if (!id) return null;
 
     return this._earthquakes()
       .find(earthquake => earthquake.id === id) ?? null;
   });
-
 
   readonly hoveredEarthquake = computed(() => {
 
     const id = this._hoveredEarthquakeId();
 
-    if (!id) {
-      return null;
-    }
+    if (!id) return null;
 
     return this._earthquakes()
       .find(earthquake => earthquake.id === id) ?? null;
   });
 
-
-  // -------------------------
-  // Actions
-  // -------------------------
-
+  /**
+   * Realiza la carga de los terremotos.
+   *
+   * @memberof EarthquakeMapStore
+   */
   loadEarthquakes(): void {
 
     // this._loading.set(true);
@@ -108,45 +85,56 @@ export class EarthquakeMapStore {
 
         error: () => {
 
-          this._error.set(
-            'No fue posible cargar los datos de terremotos.'
-          );
+          this._error.set('No fue posible cargar los datos de terremotos.');
 
           this._loading.set(false);
         }
       });
   }
 
-
+  /**
+   * Selecciona un terremoto.
+   *
+   * @param {string} id
+   * @memberof EarthquakeMapStore
+   */
   selectEarthquake(id: string): void {
     this._selectedEarthquakeId.set(id);
   }
 
-
+  /**
+   * Ubica un terremoto en el mapa.
+   *
+   * @param {string} id
+   * @memberof EarthquakeMapStore
+   */
   flyToEarthquake(id: string): void {
 
     const earthquake = this._earthquakes()
       .find(item => item.id === id);
 
-    if (!earthquake) {
-      return;
-    }
+    if (!earthquake) return;
 
     this._flyToRequest.set([...earthquake.geometry.coordinates]);
   }
 
-
+  /**
+   * Coloca el terremoto en hover.
+   *
+   * @param {(string | null)} id
+   * @memberof EarthquakeMapStore
+   */
   hoverEarthquake(id: string | null): void {
     this._hoveredEarthquakeId.set(id);
   }
 
-
+  /**
+   * Limpia la selección de terremoto.
+   *
+   * @memberof EarthquakeMapStore
+   */
   clearSelection(): void {
     this._selectedEarthquakeId.set(null);
   }
 
-
-  // clearHover(): void {
-  //   this._hoveredEarthquakeId.set(null);
-  // }
 }

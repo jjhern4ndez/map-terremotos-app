@@ -18,14 +18,6 @@ import { GeoJSONSource, Map, NavigationControl } from 'maplibre-gl';
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
-  styles: [
-    `
-      .map-container {
-        width: 100%;
-        min-height: 100vh;
-      }
-    `
-  ],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MapComponent implements AfterViewInit, OnDestroy {
@@ -34,7 +26,13 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   map!: Map;
   readonly store = inject(EarthquakeMapStore);
 
+  /**
+   * Constructor de la clase.
+   *
+   * @memberof MapComponent
+   */
   constructor() {
+    // Efecto para actualizar la lista de los terremotos con formato GeoJSON
     effect(() => {
       const features = this.store.earthquakes();
       const selectedId = this.store.selectedEarthquakeId();
@@ -46,6 +44,7 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       }
     });
 
+    // Efecto para cuando se hace click sobre un terremoto en la lista
     effect(() => {
       const coordinates = this.store.flyToRequest();
 
@@ -55,12 +54,12 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
       this.map.flyTo({
         center: [coordinates[0], coordinates[1]],
-        zoom: 6,
         essential: true,
         duration: 1000,
       });
     });
 
+    // Efecto para cuando se ubica el cursor (hover) sobre un registro en la lista
     effect(() => {
       const hovered = this.store.hoveredEarthquake();
 
@@ -78,15 +77,20 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  /**
+   * AfterViewInit del componente.
+   *
+   * @memberof MapComponent
+   */
   ngAfterViewInit(): void {
     this.map = new Map({
       container: this.mapContainer.nativeElement,
       style: 'https://demotiles.maplibre.org/style.json',
       center: [-74.0721, 4.7110],
-      zoom: 4,
+      zoom: 3
     });
 
-    this.map.addControl(new NavigationControl(), 'top-right');
+    this.map.addControl(new NavigationControl(), 'bottom-right');
 
     this.map.on('load', () => {
       this.map.addSource('earthquakes', {
@@ -144,10 +148,25 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     });
   }
 
+  /**
+   * OnDestroy del componente.
+   *
+   * @memberof MapComponent
+   */
   ngOnDestroy(): void {
     this.map?.remove();
   }
 
+  /**
+   * Convierte un array de features en un GeoJSON.
+   *
+   * @private
+   * @param {EarthquakeFeature[]} features Datos de terremotos
+   * @param {(string | null)} selectedId Id del terremoto seleccionado
+   * @param {(string | null)} hoveredId Id del terremoto en hover
+   * @return {FeatureCollection}
+   * @memberof MapComponent
+   */
   private toGeoJson(
     features: EarthquakeFeature[],
     selectedId: string | null,

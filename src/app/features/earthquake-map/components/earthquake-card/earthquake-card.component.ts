@@ -23,13 +23,13 @@ import { EarthquakeFeature } from '@models/earthquake.model';
       transition(':leave', [
         animate(
           '160ms cubic-bezier(0.4, 0, 1, 1)',
-          style({ opacity: 0, transform: 'translateY(16px) scale(0.95)' }),
+          style({ opacity: 0, transform: 'translateY(16px) scale(0.50)' }),
         ),
       ]),
     ]),
   ],
   host: {
-    class: 'block w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black/10',
+    class: 'absolute bottom-4 left-4 z-10 block w-80 max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black/10',
     '[@cardAnimation]': '',
   },
 })
