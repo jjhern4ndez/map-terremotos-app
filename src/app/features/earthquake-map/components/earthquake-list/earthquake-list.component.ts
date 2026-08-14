@@ -1,5 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, inject } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, OnDestroy, inject, signal } from '@angular/core';
+import { DecimalPipe } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
+import { ScrollingModule } from '@angular/cdk/scrolling';
+import { animate, style, transition, trigger } from '@angular/animations';
 
 import { EarthquakeMapStore } from '../../earthquake-map.store';
 import { EarthquakeFeature } from '@models/earthquake.model';
@@ -7,16 +10,29 @@ import { EarthquakeFeature } from '@models/earthquake.model';
 @Component({
   selector: 'app-earthquake-list',
   standalone: true,
-  imports: [DatePipe, DecimalPipe],
-  templateUrl: './earthquake-list.component.html',
+  imports: [DecimalPipe, MatIconModule, ScrollingModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  templateUrl: './earthquake-list.component.html',
+  animations: [
+    trigger('collapse', [
+      transition(':enter', [
+        style({ height: '0', opacity: 0 }),
+        animate('200ms cubic-bezier(0.4, 0, 0.2, 1)', style({ height: '*', opacity: 1 })),
+      ]),
+      transition(':leave', [
+        style({ height: '*', opacity: 1 }),
+        animate('200ms cubic-bezier(0.4, 0, 0.2, 1)', style({ height: '0', opacity: 0 })),
+      ]),
+    ]),
+  ],
   host: {
-    class:
-      'flex w-80 max-w-[calc(100vw-2rem)] max-h-[calc(100%-2rem)] flex-col rounded-lg bg-white/90 shadow-lg ring-1 ring-black/5 backdrop-blur',
+    class: 'flex w-90 max-w-[calc(100vw-2rem)] max-h-[calc(65%-2rem)] flex-col rounded-lg bg-white/90 shadow-lg ring-1 ring-black/5 backdrop-blur',
   },
 })
 export class EarthquakeListComponent implements OnDestroy {
   readonly store = inject(EarthquakeMapStore);
+
+  readonly collapsed = signal(false);
 
   private hoverTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -27,6 +43,15 @@ export class EarthquakeListComponent implements OnDestroy {
    */
   ngOnDestroy(): void {
     this.clearHoverTimer();
+  }
+
+  /**
+   * Alterna la visibilidad de la lista de terremotos.
+   *
+   * @memberof EarthquakeListComponent
+   */
+  toggleList(): void {
+    this.collapsed.update(value => !value);
   }
 
   /**
@@ -52,6 +77,18 @@ export class EarthquakeListComponent implements OnDestroy {
    */
   depthValue(coordinates: number[]): number {
     return coordinates[2] ?? 0;
+  }
+
+  /**
+   * Identificador único de cada terremoto para el virtual scroll.
+   *
+   * @param {number} index Índice del elemento
+   * @param {EarthquakeFeature} quake Terremoto
+   * @return {string}
+   * @memberof EarthquakeListComponent
+   */
+  trackById(index: number, quake: EarthquakeFeature): string {
+    return quake.id;
   }
 
   /**

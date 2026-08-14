@@ -69,8 +69,8 @@ export class EarthquakeMapStore {
    */
   loadEarthquakes(): void {
 
-    // this._loading.set(true);
-    // this._error.set(null);
+    this._loading.set(true);
+    this._error.set(null);
 
     this.earthquakeService
       .getEarthquakes()

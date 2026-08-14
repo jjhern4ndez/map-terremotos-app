@@ -10,4 +10,11 @@
       ></app-earthquake-card>
     }
   }
+
+  @if (store.loading()) {
+    <div class="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-white/70 backdrop-blur-sm">
+      <div class="h-10 w-10 animate-spin rounded-full border-4 border-gray-200 border-t-red-600"></div>
+      <p class="text-sm font-medium text-gray-700">Cargando mapa y datos...</p>
+    </div>
+  }
 </div>

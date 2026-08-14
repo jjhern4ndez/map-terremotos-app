@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { DatePipe, DecimalPipe } from '@angular/common';
+import { DatePipe, DecimalPipe, NgClass } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { animate, style, transition, trigger } from '@angular/animations';
 
@@ -8,7 +8,7 @@ import { EarthquakeFeature } from '@models/earthquake.model';
 @Component({
   selector: 'app-earthquake-card',
   standalone: true,
-  imports: [DatePipe, DecimalPipe, MatIconModule],
+  imports: [DatePipe, DecimalPipe, MatIconModule, NgClass],
   templateUrl: './earthquake-card.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [
@@ -36,4 +36,23 @@ import { EarthquakeFeature } from '@models/earthquake.model';
 export class EarthquakeCardComponent {
   @Input({ required: true }) earthquake!: EarthquakeFeature;
   @Output() close = new EventEmitter<void>();
+
+  /**
+   * Obtiene el color de la clase de Tailwind según la magnitud del terremoto.
+   *
+   * @param {number} mag Magnitud del terremoto
+   * @param {boolean} [isText=false] Indica si se desea obtener el color de fondo o de texto
+   * @return {string}
+   * @memberof EarthquakeCardComponent
+   */
+  magnitudeClass(mag: number, isText = false): string {
+    let prefix = isText ? 'text' : 'bg';
+
+    if (mag >= 5) return `${prefix}-red-600`;
+    if (mag >= 4.5) return `${prefix}-orange-500`;
+    if (mag >= 2.5) return `${prefix}-amber-400`;
+
+    return `${prefix}-emerald-500`;
+  }
+
 }

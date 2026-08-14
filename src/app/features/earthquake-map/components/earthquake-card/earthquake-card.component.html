@@ -1,26 +1,26 @@
-<div class="bg-red-600 px-4 py-3 text-white">
+<div class="px-3 py-2.5 text-white" [ngClass]="magnitudeClass(earthquake.properties.mag)">
   <div class="flex items-start justify-between gap-3">
-    <div class="min-w-0">
-      <h3 class="truncate text-base font-semibold">{{ earthquake.properties.place }}</h3>
-      <p class="mt-0.5 text-xs text-red-100">{{ earthquake.properties.time | date: 'full' }}</p>
+    <div class="min-w-0 flex-1">
+      <h3 class="break-words text-base font-semibold leading-snug">{{ earthquake.properties.place }}</h3>
+      <p class="mt-0.5 text-xs text-white/80">{{ earthquake.properties.time | date: 'full' }}</p>
     </div>
     <button
       type="button"
       (click)="close.emit()"
       aria-label="Cerrar"
-      class="-mr-1 -mt-1 shrink-0 rounded-full p-1 text-red-100 transition hover:bg-red-700 hover:text-white"
+      class="-mr-1 -mt-1 flex h-6 w-6 shrink-0 items-center justify-center cursor-pointer rounded-full text-white/70 transition hover:bg-white/15 hover:text-white"
     >
-      <mat-icon class="text-xl leading-none">close</mat-icon>
+      <mat-icon class="text-lg leading-none">close</mat-icon>
     </button>
   </div>
 </div>
 
-<div class="px-4 py-3">
+<div class="px-3 py-2.5">
   <div class="flex items-center gap-4">
-    <div class="flex h-16 w-16 shrink-0 flex-col items-center justify-center rounded-lg bg-gray-50 ring-1 ring-gray-200">
-      <span class="text-2xl font-bold leading-none text-red-600">
+    <div class="flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-lg bg-gray-50 ring-1 ring-gray-200">
+      <div class="text-xl font-bold leading-none" [ngClass]="magnitudeClass(earthquake.properties.mag, true)">
         {{ earthquake.properties.mag | number: '1.1-1' }}
-      </span>
+      </div>
       <span class="mt-1 text-[10px] font-medium uppercase tracking-wide text-gray-500">magnitud</span>
     </div>
 
@@ -65,7 +65,7 @@
     [href]="earthquake.properties.url"
     target="_blank"
     rel="noopener"
-    class="mt-3 flex items-center justify-center gap-1 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition hover:bg-red-100"
+    class="mt-3 flex items-center justify-center gap-1 rounded-lg bg-blue-500 px-3 py-2 text-sm font-medium text-white transition hover:bg-blue-600"
   >
     Ver detalle completo
     <mat-icon class="text-base leading-none">open_in_new</mat-icon>

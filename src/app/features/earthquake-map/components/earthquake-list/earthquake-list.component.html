@@ -1,50 +1,63 @@
-<header class="flex items-center justify-between border-b border-gray-200 px-4 py-3">
+<header class="flex h-12 shrink-0 items-center justify-between border-b border-gray-200 px-4">
   <h2 class="text-sm font-semibold text-gray-800">Terremotos</h2>
-  <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
-    {{ store.earthquakes().length }} resultados
-  </span>
+  <div class="flex items-center gap-2">
+    <span class="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-600">
+      {{ store.earthquakes().length }} resultados
+    </span>
+    <button
+      type="button"
+      (click)="toggleList()"
+      [attr.aria-expanded]="!collapsed()"
+      aria-label="Mostrar u ocultar lista"
+      class="flex h-7 w-7 shrink-0 items-center justify-center cursor-pointer rounded-md text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
+    >
+      <mat-icon class="text-xl leading-none">
+        {{ collapsed() ? 'expand_more' : 'expand_less' }}
+      </mat-icon>
+    </button>
+  </div>
 </header>
 
-@if (store.loading()) {
-  <div class="flex flex-1 items-center justify-center p-6 text-sm text-gray-500">
-    Cargando terremotos...
-  </div>
-} @else if (store.error()) {
-  <div class="flex flex-1 items-center justify-center p-6 text-sm text-red-600">
-    {{ store.error() }}
-  </div>
-} @else {
-  <ul class="flex-1 divide-y divide-gray-100 overflow-y-auto">
-    @for (quake of store.earthquakes(); track quake.id) {
-      <li
-        class="flex cursor-pointer items-start gap-3 px-4 py-3 transition hover:bg-gray-200"
-        (click)="selectEarthquake(quake)"
-        (mouseenter)="onMouseEnter(quake)"
-        (mouseleave)="onMouseLeave()"
-      >
-        <span
-          class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold text-white"
-          [class]="magnitudeClass(quake.properties.mag)"
-        >
-          {{ quake.properties.mag | number: '1.1-1' }}
-        </span>
-
-        <div class="min-w-0 flex-1">
-          <p class="truncate text-sm font-medium text-gray-800">{{ quake.properties.place }}</p>
-          <p class="mt-0.5 text-xs text-gray-500">
-            {{ quake.properties.time | date: 'medium' }}
-          </p>
-        </div>
-
-        <div class="shrink-0 text-right text-xs text-gray-500">
-          <p class="font-medium text-gray-700">{{ depthValue(quake.geometry.coordinates) | number: '1.0-0' }} km</p>
-          <p class="mt-0.5">profundidad</p>
-        </div>
-      </li>
-    } @empty {
-      <div class="flex flex-1 items-center justify-center p-6 text-sm text-gray-500">
+@if (!collapsed()) {
+  <div @collapse class="overflow-hidden">
+    @if (store.loading()) {
+      <div class="flex h-[calc(65vh-2rem-3rem)] items-center justify-center p-6 text-[13px] text-gray-500">
+        Cargando terremotos...
+      </div>
+    } @else if (store.error()) {
+      <div class="flex h-[calc(65vh-2rem-3rem)] items-center justify-center p-6 text-[13px] text-red-600">
+        {{ store.error() }}
+      </div>
+    } @else if (store.earthquakes().length === 0) {
+      <div class="flex h-[calc(65vh-2rem-3rem)] items-center justify-center p-6 text-[13px] text-gray-500">
         No hay terremotos registrados.
       </div>
+    } @else {
+      <cdk-virtual-scroll-viewport [itemSize]="62" class="h-[calc(65vh-2rem-3rem)]">
+        <ul class="divide-y divide-gray-100">
+            <li
+              *cdkVirtualFor="let quake of store.earthquakes(); trackBy: trackById"
+              class="flex h-12 my-2 cursor-pointer items-center gap-3 px-4 transition hover:bg-gray-200"
+              (click)="selectEarthquake(quake)"
+              (mouseenter)="onMouseEnter(quake)"
+              (mouseleave)="onMouseLeave()"
+            >
+              <span
+                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-[13px] font-bold text-white"
+                [class]="magnitudeClass(quake.properties.mag)"
+              >
+                {{ quake.properties.mag | number: '1.1-1' }}
+              </span>
+
+              <div class="flex min-w-0 flex-1 flex-col">
+                <div class="flex items-center gap-1truncate text-[13px] font-medium leading-tight text-gray-800">
+                  {{ quake.properties.place }}
+                </div>
+              </div>
+
+            </li>
+        </ul>
+      </cdk-virtual-scroll-viewport>
     }
-  </ul>
+  </div>
 }
