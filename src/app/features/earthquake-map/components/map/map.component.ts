@@ -1,16 +1,19 @@
-  import {
-    AfterViewInit,
+import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
   OnDestroy,
   ViewChild,
+  effect,
   inject
 } from '@angular/core';
+import type { FeatureCollection, Point } from 'geojson';
 
 import { EarthquakeMapStore } from '../../earthquake-map.store';
+import { EarthquakeFeature } from '@models/earthquake.model';
 
-import { Map, Marker, NavigationControl } from 'maplibre-gl';
+import { GeoJSONSource, Map, NavigationControl } from 'maplibre-gl';
 
 @Component({
   selector: 'app-map',
@@ -19,7 +22,7 @@ import { Map, Marker, NavigationControl } from 'maplibre-gl';
     `
       .map-container {
         width: 100%;
-        height: 500px;
+        min-height: 100vh;
       }
     `
   ],
@@ -29,6 +32,51 @@ export class MapComponent implements AfterViewInit, OnDestroy {
   @ViewChild('map') private mapContainer!: ElementRef<HTMLDivElement>;
 
   map!: Map;
+  readonly store = inject(EarthquakeMapStore);
+
+  constructor() {
+    effect(() => {
+      const features = this.store.earthquakes();
+      const selectedId = this.store.selectedEarthquakeId();
+      const hoveredId = this.store.hoveredEarthquakeId();
+      const source = this.map?.getSource('earthquakes') as GeoJSONSource | undefined;
+
+      if (source) {
+        source.setData(this.toGeoJson(features, selectedId, hoveredId));
+      }
+    });
+
+    effect(() => {
+      const coordinates = this.store.flyToRequest();
+
+      if (!coordinates || !this.map) {
+        return;
+      }
+
+      this.map.flyTo({
+        center: [coordinates[0], coordinates[1]],
+        zoom: 6,
+        essential: true,
+        duration: 1000,
+      });
+    });
+
+    effect(() => {
+      const hovered = this.store.hoveredEarthquake();
+
+      if (!hovered || !this.map) {
+        return;
+      }
+
+      const [lng, lat] = hovered.geometry.coordinates;
+
+      this.map.easeTo({
+        center: [lng, lat],
+        duration: 400,
+        essential: true,
+      });
+    });
+  }
 
   ngAfterViewInit(): void {
     this.map = new Map({
@@ -40,12 +88,83 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
     this.map.addControl(new NavigationControl(), 'top-right');
 
-    new Marker()
-      .setLngLat([-74.0721, 4.7110])
-      .addTo(this.map);
+    this.map.on('load', () => {
+      this.map.addSource('earthquakes', {
+        type: 'geojson',
+        data: this.toGeoJson(this.store.earthquakes(), this.store.selectedEarthquakeId(), this.store.hoveredEarthquakeId()),
+      });
+
+      this.map.addLayer({
+        id: 'earthquakes',
+        type: 'circle',
+        source: 'earthquakes',
+        paint: {
+          'circle-radius': [
+            'case',
+            ['any', ['get', 'selected'], ['get', 'hovered']],
+            8,
+            6,
+          ],
+          'circle-color': [
+            'case',
+            ['get', 'selected'],
+            '#ef4444',
+            ['get', 'hovered'],
+            '#3b82f6',
+            '#9ca3af',
+          ],
+          'circle-stroke-width': 1,
+          'circle-stroke-color': '#ffffff',
+        },
+      });
+
+      this.map.on('click', 'earthquakes', (event) => {
+        const feature = event.features?.[0];
+
+        if (!feature) {
+          return;
+        }
+
+        const id = feature.properties?.['id'] as string | undefined;
+
+        if (!id) {
+          return;
+        }
+
+        this.store.selectEarthquake(id);
+      });
+
+      this.map.on('mouseenter', 'earthquakes', () => {
+        this.map.getCanvas().style.cursor = 'pointer';
+      });
+
+      this.map.on('mouseleave', 'earthquakes', () => {
+        this.map.getCanvas().style.cursor = '';
+      });
+    });
   }
 
   ngOnDestroy(): void {
     this.map?.remove();
+  }
+
+  private toGeoJson(
+    features: EarthquakeFeature[],
+    selectedId: string | null,
+    hoveredId: string | null,
+  ): FeatureCollection {
+    return {
+      type: 'FeatureCollection',
+      features: features.map(({ id, geometry, properties }) => ({
+        type: 'Feature',
+        geometry: geometry as Point,
+        properties: {
+          ...properties,
+          id,
+          selected: id === selectedId,
+          hovered: id === hoveredId,
+        },
+      })),
+    };
   }
 }

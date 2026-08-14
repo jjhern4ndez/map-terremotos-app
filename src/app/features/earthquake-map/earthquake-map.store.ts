@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 
-import { EarthquakeService } from '../../core/services/earthquake.service';
-import { EarthquakeFeature } from '../../core/models/earthquake.model';
+import { EarthquakeService } from '@services/earthquake.service';
+import { EarthquakeFeature } from '@models/earthquake.model';
 
 @Injectable()
 export class EarthquakeMapStore {
@@ -15,6 +15,9 @@ export class EarthquakeMapStore {
   private readonly _earthquakes =
     signal<EarthquakeFeature[]>([]);
 
+  private readonly _responseGeoJson =
+    signal<any>([]);
+
   private readonly _selectedEarthquakeId =
     signal<string | null>(null);
 
@@ -27,6 +30,9 @@ export class EarthquakeMapStore {
   private readonly _error =
     signal<string | null>(null);
 
+  private readonly _flyToRequest =
+    signal<number[] | null>(null);
+
 
   // -------------------------
   // Selectors
@@ -34,6 +40,9 @@ export class EarthquakeMapStore {
 
   readonly earthquakes =
     this._earthquakes.asReadonly();
+
+  readonly responseGeoJson =
+    this._responseGeoJson.asReadonly();
 
   readonly selectedEarthquakeId =
     this._selectedEarthquakeId.asReadonly();
@@ -46,6 +55,9 @@ export class EarthquakeMapStore {
 
   readonly error =
     this._error.asReadonly();
+
+  readonly flyToRequest =
+    this._flyToRequest.asReadonly();
 
 
   readonly selectedEarthquake = computed(() => {
@@ -87,8 +99,8 @@ export class EarthquakeMapStore {
       .getEarthquakes()
       .subscribe({
         next: response => {
-          console.log(response);
 
+          this._responseGeoJson.set(response);
           this._earthquakes.set(response.features);
 
           this._loading.set(false);
@@ -106,19 +118,32 @@ export class EarthquakeMapStore {
   }
 
 
-  // selectEarthquake(id: string): void {
-  //   this._selectedEarthquakeId.set(id);
-  // }
+  selectEarthquake(id: string): void {
+    this._selectedEarthquakeId.set(id);
+  }
 
 
-  // hoverEarthquake(id: string | null): void {
-  //   this._hoveredEarthquakeId.set(id);
-  // }
+  flyToEarthquake(id: string): void {
+
+    const earthquake = this._earthquakes()
+      .find(item => item.id === id);
+
+    if (!earthquake) {
+      return;
+    }
+
+    this._flyToRequest.set([...earthquake.geometry.coordinates]);
+  }
 
 
-  // clearSelection(): void {
-  //   this._selectedEarthquakeId.set(null);
-  // }
+  hoverEarthquake(id: string | null): void {
+    this._hoveredEarthquakeId.set(id);
+  }
+
+
+  clearSelection(): void {
+    this._selectedEarthquakeId.set(null);
+  }
 
 
   // clearHover(): void {

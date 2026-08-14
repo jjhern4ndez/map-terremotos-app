@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { DataCollection } from '../models/earthquake.model';
+import { DataCollection } from '@models/earthquake.model';
 
 @Injectable({providedIn: 'root'})
 export class EarthquakeService {
