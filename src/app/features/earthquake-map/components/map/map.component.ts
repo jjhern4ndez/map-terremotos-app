@@ -55,7 +55,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
       this.map.flyTo({
         center: [coordinates[0], coordinates[1]],
         essential: true,
-        duration: 1000,
+        duration: 1200,
+        zoom: 15
       });
     });
 
@@ -69,10 +70,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
 
       const [lng, lat] = hovered.geometry.coordinates;
 
-      this.map.easeTo({
+      this.map.flyTo({
         center: [lng, lat],
-        duration: 400,
+        duration: 1500,
         essential: true,
+        zoom: 10
       });
     });
   }
@@ -95,7 +97,11 @@ export class MapComponent implements AfterViewInit, OnDestroy {
     this.map.on('load', () => {
       this.map.addSource('earthquakes', {
         type: 'geojson',
-        data: this.toGeoJson(this.store.earthquakes(), this.store.selectedEarthquakeId(), this.store.hoveredEarthquakeId()),
+        data: this.toGeoJson(
+          this.store.earthquakes(),
+          this.store.selectedEarthquakeId(),
+          this.store.hoveredEarthquakeId()
+        ),
       });
 
       this.map.addLayer({
@@ -106,8 +112,8 @@ export class MapComponent implements AfterViewInit, OnDestroy {
           'circle-radius': [
             'case',
             ['any', ['get', 'selected'], ['get', 'hovered']],
-            8,
             6,
+            3,
           ],
           'circle-color': [
             'case',
@@ -115,27 +121,23 @@ export class MapComponent implements AfterViewInit, OnDestroy {
             '#ef4444',
             ['get', 'hovered'],
             '#3b82f6',
-            '#9ca3af',
+            '#8A8A8A',
           ],
           'circle-stroke-width': 1,
-          'circle-stroke-color': '#ffffff',
+          'circle-stroke-color': '#6B6B6B',
         },
       });
 
       this.map.on('click', 'earthquakes', (event) => {
         const feature = event.features?.[0];
 
-        if (!feature) {
-          return;
-        }
+        if (!feature) return;
 
-        const id = feature.properties?.['id'] as string | undefined;
+        const id = feature.properties?.['id'];
 
-        if (!id) {
-          return;
-        }
+        if (!id) return;
 
-        this.store.selectEarthquake(id);
+        this.store.selectEarthquake(id as string);
       });
 
       this.map.on('mouseenter', 'earthquakes', () => {

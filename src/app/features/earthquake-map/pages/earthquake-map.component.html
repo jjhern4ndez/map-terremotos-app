@@ -1,15 +1,13 @@
 <div class="relative">
   <app-map></app-map>
-  <app-earthquake-list class="absolute right-4 top-4 z-10"></app-earthquake-list>
+  <app-earthquake-list></app-earthquake-list>
 
-  @for (quake of [store.selectedEarthquake()]; track quake?.id) {
-    @if (quake) {
+    @if (store.selectedEarthquake(); as quake) {
       <app-earthquake-card
         [earthquake]="quake"
         (close)="store.clearSelection()"
       ></app-earthquake-card>
     }
-  }
 
   @if (store.loading()) {
     <div class="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-white/70 backdrop-blur-sm">

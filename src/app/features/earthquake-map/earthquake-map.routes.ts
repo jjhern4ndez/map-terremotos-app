@@ -4,6 +4,7 @@ import { EarthquakeMapStore } from "./earthquake-map.store";
 export const routes: Routes = [
   {
     path: '',
+    title: 'Visor Geográfico de Terremotos',
     providers:[
       EarthquakeMapStore
     ],

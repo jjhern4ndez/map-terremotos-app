@@ -10,29 +10,31 @@ import { EarthquakeFeature } from '@models/earthquake.model';
 @Component({
   selector: 'app-earthquake-list',
   standalone: true,
-  imports: [DecimalPipe, MatIconModule, ScrollingModule],
+  imports: [
+    DecimalPipe,
+    MatIconModule,
+    ScrollingModule
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './earthquake-list.component.html',
   animations: [
     trigger('collapse', [
       transition(':enter', [
         style({ height: '0', opacity: 0 }),
-        animate('200ms cubic-bezier(0.4, 0, 0.2, 1)', style({ height: '*', opacity: 1 })),
+        animate('600ms cubic-bezier(0.7, 0, 0.2, 1)', style({ height: '*', opacity: 1 })),
       ]),
       transition(':leave', [
         style({ height: '*', opacity: 1 }),
-        animate('200ms cubic-bezier(0.4, 0, 0.2, 1)', style({ height: '0', opacity: 0 })),
+        animate('600ms cubic-bezier(0.7, 0, 0.2, 1)', style({ height: '0', opacity: 0 })),
       ]),
     ]),
   ],
   host: {
-    class: 'flex w-90 max-w-[calc(100vw-2rem)] max-h-[calc(65%-2rem)] flex-col rounded-lg bg-white/90 shadow-lg ring-1 ring-black/5 backdrop-blur',
+    class: 'absolute right-4 top-4 z-10 flex w-90 max-h-[calc(65%-2rem)] flex-col rounded-lg bg-white/90 shadow-lg ring-1 ring-black/5 backdrop-blur',
   },
 })
 export class EarthquakeListComponent implements OnDestroy {
   readonly store = inject(EarthquakeMapStore);
-
-  readonly collapsed = signal(false);
 
   private hoverTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -51,7 +53,7 @@ export class EarthquakeListComponent implements OnDestroy {
    * @memberof EarthquakeListComponent
    */
   toggleList(): void {
-    this.collapsed.update(value => !value);
+    this.store.collapsedList.update(value => !value);
   }
 
   /**

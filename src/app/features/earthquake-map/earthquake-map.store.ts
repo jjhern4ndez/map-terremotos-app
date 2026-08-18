@@ -1,7 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-
 import { EarthquakeService } from '@services/earthquake.service';
 import { EarthquakeFeature } from '@models/earthquake.model';
+import { timeout } from 'rxjs';
 
 @Injectable()
 export class EarthquakeMapStore {
@@ -12,8 +12,6 @@ export class EarthquakeMapStore {
    * Estados principales
    */
   private readonly _earthquakes = signal<EarthquakeFeature[]>([]);
-
-  private readonly _responseGeoJson = signal<any>([]);
 
   private readonly _selectedEarthquakeId = signal<string | null>(null);
 
@@ -28,9 +26,9 @@ export class EarthquakeMapStore {
   /**
    * Getters
    */
-  readonly earthquakes = this._earthquakes.asReadonly();
+  collapsedList = signal(true);
 
-  readonly responseGeoJson = this._responseGeoJson.asReadonly();
+  readonly earthquakes = this._earthquakes.asReadonly();
 
   readonly selectedEarthquakeId = this._selectedEarthquakeId.asReadonly();
 
@@ -77,10 +75,11 @@ export class EarthquakeMapStore {
       .subscribe({
         next: response => {
 
-          this._responseGeoJson.set(response);
           this._earthquakes.set(response.features);
 
           this._loading.set(false);
+
+          setTimeout(() => this.collapsedList.set(false), 1000);
         },
 
         error: () => {

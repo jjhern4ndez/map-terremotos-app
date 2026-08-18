@@ -1,7 +1,7 @@
 <div class="px-3 py-2.5 text-white" [ngClass]="magnitudeClass(earthquake.properties.mag)">
   <div class="flex items-start justify-between gap-3">
     <div class="min-w-0 flex-1">
-      <h3 class="break-words text-base font-semibold leading-snug">{{ earthquake.properties.place }}</h3>
+      <h3 class="wrap-break-word text-base font-semibold leading-snug">{{ earthquake.properties.place }}</h3>
       <p class="mt-0.5 text-xs text-white/80">{{ earthquake.properties.time | date: 'full' }}</p>
     </div>
     <button

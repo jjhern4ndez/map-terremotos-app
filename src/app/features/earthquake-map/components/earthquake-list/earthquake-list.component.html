@@ -7,18 +7,18 @@
     <button
       type="button"
       (click)="toggleList()"
-      [attr.aria-expanded]="!collapsed()"
+      [attr.aria-expanded]="!store.collapsedList()"
       aria-label="Mostrar u ocultar lista"
       class="flex h-7 w-7 shrink-0 items-center justify-center cursor-pointer rounded-md text-gray-500 transition hover:bg-gray-100 hover:text-gray-700"
     >
       <mat-icon class="text-xl leading-none">
-        {{ collapsed() ? 'expand_more' : 'expand_less' }}
+        {{ store.collapsedList() ? 'expand_more' : 'expand_less' }}
       </mat-icon>
     </button>
   </div>
 </header>
 
-@if (!collapsed()) {
+@if (!store.collapsedList()) {
   <div @collapse class="overflow-hidden">
     @if (store.loading()) {
       <div class="flex h-[calc(65vh-2rem-3rem)] items-center justify-center p-6 text-[13px] text-gray-500">
